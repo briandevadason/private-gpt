@@ -1,5 +1,3 @@
-### IMPORTANT, THIS IMAGE CAN ONLY BE RUN IN LINUX DOCKER
-### You will run into a segfault in mac
 FROM python:3.11.6-slim-bookworm as base
 
 # Install poetry
@@ -9,14 +7,6 @@ RUN pipx install poetry
 ENV PATH="/root/.local/bin:$PATH"
 ENV PATH=".venv/bin/:$PATH"
 
-# Dependencies to build llama-cpp
-RUN apt update && apt install -y \
-  libopenblas-dev\
-  ninja-build\
-  build-essential\
-  pkg-config\
-  wget
-
 # https://python-poetry.org/docs/configuration/#virtualenvsin-project
 ENV POETRY_VIRTUALENVS_IN_PROJECT=true
 
@@ -24,7 +14,7 @@ FROM base as dependencies
 WORKDIR /home/worker/app
 COPY pyproject.toml poetry.lock ./
 
-RUN poetry install --extras "ui embeddings-huggingface llms-llama-cpp vector-stores-qdrant"
+RUN poetry install --extras "ui vector-stores-qdrant llms-ollama embeddings-ollama"
 
 FROM base as app
 
@@ -33,8 +23,7 @@ ENV PORT=8080
 EXPOSE 8080
 
 # Prepare a non-root user
-RUN adduser --group worker
-RUN adduser --system --ingroup worker worker
+RUN adduser --system worker
 WORKDIR /home/worker/app
 
 RUN mkdir local_data; chown worker local_data

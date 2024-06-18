@@ -1,23 +1,16 @@
-version: '3.8'  # Use your preferred Docker Compose version
-
 services:
   private-gpt:
     build:
-      context: .
       dockerfile: Dockerfile.external
     volumes:
       - ./local_data/:/home/worker/app/local_data
     ports:
-      - "8002:8080"
+      - 8001:8080
     environment:
       PORT: 8080
       PGPT_PROFILES: docker
       PGPT_MODE: ollama
-
   ollama:
     image: ollama/ollama:latest
-    runtime: nvidia  # Use 'nvidia' runtime for NVIDIA GPUs
     volumes:
       - ./models:/root/.ollama
-    environment:
-      NVIDIA_VISIBLE_DEVICES: all  # Use all available GPUs
